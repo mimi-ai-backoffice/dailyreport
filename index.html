@@ -1,11 +1,16 @@
 
+// v1.1 (2026-03-15) 顧客の反応・次回アクション・懸念課題のチップを追加
+// v1.0 (2026-03-15) 初版
+
 <style>
 .chip { display:inline-block; padding:6px 14px; border-radius:20px; font-size:13px; cursor:pointer; border:0.5px solid var(--color-border-secondary); background:var(--color-background-secondary); color:var(--color-text-secondary); margin:4px; transition:all 0.15s; }
 .chip.active-blue { background:var(--color-background-info); color:var(--color-text-info); border-color:var(--color-border-info); }
 .chip.active-green { background:var(--color-background-success); color:var(--color-text-success); border-color:var(--color-border-success); }
+.chip.active-orange { background:var(--color-background-warning); color:var(--color-text-warning); border-color:var(--color-border-warning); }
 .card { background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:1rem 1.25rem; margin-bottom:12px; }
 .label { font-size:12px; color:var(--color-text-secondary); margin-bottom:8px; }
 .req { color:var(--color-text-danger); }
+.opt { color:var(--color-text-tertiary); font-size:11px; }
 .btn-main { width:100%; padding:12px; border-radius:var(--border-radius-md); background:var(--color-background-info); color:var(--color-text-info); border:0.5px solid var(--color-border-info); font-size:14px; font-weight:500; cursor:pointer; margin-top:4px; }
 .btn-main:disabled { background:var(--color-background-secondary); color:var(--color-text-tertiary); border-color:var(--color-border-tertiary); cursor:not-allowed; }
 .btn-sub { width:100%; padding:10px; border-radius:var(--border-radius-md); background:var(--color-background-secondary); color:var(--color-text-secondary); border:0.5px solid var(--color-border-secondary); font-size:13px; cursor:pointer; margin-top:8px; }
@@ -41,9 +46,9 @@ textarea { width:100%; box-sizing:border-box; resize:vertical; padding:10px; bor
   <div class="card" style="background:var(--color-background-secondary);">
     <div class="label">デモ用PIN</div>
     <div style="font-size:13px; color:var(--color-text-secondary); line-height:2;">
-      <span style="color:var(--color-text-info); font-weight:500;">1234</span>　田中太郎さん<br>
-      <span style="color:var(--color-text-info); font-weight:500;">5678</span>　佐藤花子さん<br>
-      <span style="color:var(--color-text-info); font-weight:500;">9012</span>　加藤次郎さん
+      <span style="color:var(--color-text-info); font-weight:500;">1234</span>　田中太郎<br>
+      <span style="color:var(--color-text-info); font-weight:500;">5678</span>　佐藤花子<br>
+      <span style="color:var(--color-text-info); font-weight:500;">9012</span>　加藤次郎
     </div>
   </div>
 </div>
@@ -76,6 +81,24 @@ textarea { width:100%; box-sizing:border-box; resize:vertical; padding:10px; bor
     <div id="task-chips"></div>
   </div>
 
+  <!-- 顧客の反応 -->
+  <div class="card">
+    <div class="label">顧客の反応・温度感 <span class="opt">（任意）</span></div>
+    <div id="reaction-chips"></div>
+  </div>
+
+  <!-- 次回アクション -->
+  <div class="card">
+    <div class="label">次回アクション <span class="opt">（任意）</span></div>
+    <div id="action-chips"></div>
+  </div>
+
+  <!-- 懸念・課題 -->
+  <div class="card">
+    <div class="label">懸念・課題 <span class="opt">（複数選択可）</span></div>
+    <div id="concern-chips"></div>
+  </div>
+
   <!-- メモ -->
   <div class="card">
     <div class="label">メモ（任意）</div>
@@ -91,7 +114,7 @@ textarea { width:100%; box-sizing:border-box; resize:vertical; padding:10px; bor
 <div id="screen-report" style="display:none;">
   <div class="card">
     <div class="label">日報（編集できます）</div>
-    <textarea id="report-text" rows="14" style="font-size:13px; line-height:1.8;"></textarea>
+    <textarea id="report-text" rows="18" style="font-size:13px; line-height:1.8;"></textarea>
   </div>
   <button class="btn-success" onclick="showDone()">この内容で確定する</button>
   <button class="btn-sub" onclick="show('add')">← 記録に戻る</button>
@@ -115,13 +138,16 @@ textarea { width:100%; box-sizing:border-box; resize:vertical; padding:10px; bor
 
 <script>
 const USERS = {
-  "1234": { name:"田中太郎さん", clients:["A商事","B工業","C物産","D建設"] },
-  "5678": { name:"佐藤花子さん", clients:["E商店","F工業","G物産"] },
-  "9012": { name:"加藤次郎さん", clients:["H商事","I建設","J工業","K物産"] }
+  "1234": { name:"田中太郎", clients:["A商事","B工業","C物産","D建設"] },
+  "5678": { name:"佐藤花子", clients:["E商店","F工業","G物産"] },
+  "9012": { name:"加藤次郎", clients:["H商事","I建設","J工業","K物産"] }
 };
-const TASKS = ["訪問","見積作成・提出","商談","受注","電話・メール対応","社内事務","その他"];
+const TASKS     = ["訪問","見積作成・提出","商談","受注","電話・メール対応","社内事務","その他"];
+const REACTIONS = ["興味あり","前向き検討中","要フォロー","難しそう","次回に持ち越し","受注確定"];
+const ACTIONS   = ["電話フォロー","メール送付","再訪問","見積提出","社内確認待ち","アポ調整中","完結"];
+const CONCERNS  = ["価格が障壁","決裁者に未接触","競合がいる","社内調整中","タイミング合わず","特になし"];
 
-let currentUser=null, entries=[], selClient="", selTasks=[];
+let currentUser=null, entries=[], selClient="", selTasks=[], selReaction="", selAction="", selConcerns=[];
 
 const d = new Date();
 document.getElementById("today-date").textContent = d.toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"});
@@ -144,6 +170,7 @@ function handlePin(){
 }
 
 function buildChips(){
+  // 訪問先
   const cc = document.getElementById("client-chips");
   cc.innerHTML="";
   currentUser.clients.forEach(c=>{
@@ -158,6 +185,7 @@ function buildChips(){
     cc.appendChild(b);
   });
 
+  // 作業内容
   const tc = document.getElementById("task-chips");
   tc.innerHTML="";
   TASKS.forEach(t=>{
@@ -170,6 +198,47 @@ function buildChips(){
     };
     tc.appendChild(b);
   });
+
+  // 顧客の反応（単一選択）
+  const rc = document.getElementById("reaction-chips");
+  rc.innerHTML="";
+  REACTIONS.forEach(r=>{
+    const b=document.createElement("button");
+    b.className="chip"; b.textContent=r;
+    b.onclick=()=>{
+      selReaction = selReaction===r ? "" : r;
+      rc.querySelectorAll(".chip").forEach(x=>x.className="chip");
+      if(selReaction) b.className="chip active-green";
+    };
+    rc.appendChild(b);
+  });
+
+  // 次回アクション（単一選択）
+  const ac = document.getElementById("action-chips");
+  ac.innerHTML="";
+  ACTIONS.forEach(a=>{
+    const b=document.createElement("button");
+    b.className="chip"; b.textContent=a;
+    b.onclick=()=>{
+      selAction = selAction===a ? "" : a;
+      ac.querySelectorAll(".chip").forEach(x=>x.className="chip");
+      if(selAction) b.className="chip active-blue";
+    };
+    ac.appendChild(b);
+  });
+
+  // 懸念・課題（複数選択）
+  const cnc = document.getElementById("concern-chips");
+  cnc.innerHTML="";
+  CONCERNS.forEach(c=>{
+    const b=document.createElement("button");
+    b.className="chip"; b.textContent=c;
+    b.onclick=()=>{
+      if(selConcerns.includes(c)){ selConcerns=selConcerns.filter(x=>x!==c); b.className="chip"; }
+      else { selConcerns.push(c); b.className="chip active-orange"; }
+    };
+    cnc.appendChild(b);
+  });
 }
 
 function updateAddBtn(){
@@ -179,8 +248,7 @@ function updateAddBtn(){
 function updateEntryCount(){
   const ec = document.getElementById("entry-count");
   ec.textContent = entries.length>0 ? entries.length+"件記録済み" : "";
-  const ec2 = document.getElementById("entries-card");
-  ec2.style.display = entries.length>0 ? "block" : "none";
+  document.getElementById("entries-card").style.display = entries.length>0 ? "block" : "none";
   document.getElementById("finish-btn").style.display = entries.length>0 ? "block" : "none";
   document.getElementById("skip-btn").style.display = entries.length>0 ? "block" : "none";
   renderEntries();
@@ -193,7 +261,13 @@ function renderEntries(){
   entries.forEach((e,i)=>{
     const row=document.createElement("div");
     row.className="entry-row";
-    row.innerHTML=`<div><span style="color:var(--color-text-success);font-weight:500;">${e.client}</span><br><span style="color:var(--color-text-secondary);">${e.tasks.join("・")}</span>${e.memo?`<br><span style="color:var(--color-text-tertiary);font-size:12px;">${e.memo}</span>`:""}</div><button class="del-btn" onclick="deleteEntry(${i})">×</button>`;
+    let detail = `<span style="color:var(--color-text-success);font-weight:500;">${e.client}</span><br>`;
+    detail += `<span style="color:var(--color-text-secondary);">${e.tasks.join("・")}</span>`;
+    if(e.reaction) detail += `<br><span style="font-size:12px; color:var(--color-text-success);">反応：${e.reaction}</span>`;
+    if(e.action)   detail += `<br><span style="font-size:12px; color:var(--color-text-info);">次回：${e.action}</span>`;
+    if(e.concerns.length>0) detail += `<br><span style="font-size:12px; color:var(--color-text-warning);">懸念：${e.concerns.join("・")}</span>`;
+    if(e.memo)     detail += `<br><span style="color:var(--color-text-tertiary);font-size:12px;">${e.memo}</span>`;
+    row.innerHTML=`<div>${detail}</div><button class="del-btn" onclick="deleteEntry(${i})">×</button>`;
     el.appendChild(row);
   });
 }
@@ -205,18 +279,23 @@ function updateStepBar(){
   bar.innerHTML="";
   const total = Math.max(entries.length+1, 2);
   for(let i=0;i<total;i++){
-    const d2=document.createElement("div");
-    d2.className="step-dot"+(i<entries.length?" done":"");
-    bar.appendChild(d2);
+    const dot=document.createElement("div");
+    dot.className="step-dot"+(i<entries.length?" done":"");
+    bar.appendChild(dot);
   }
 }
 
 function addEntry(){
   const memo = document.getElementById("memo-input").value.trim();
-  entries.push({ client:selClient, tasks:[...selTasks], memo });
-  selClient=""; selTasks=[];
+  entries.push({ client:selClient, tasks:[...selTasks], reaction:selReaction, action:selAction, concerns:[...selConcerns], memo });
+
+  // リセット
+  selClient=""; selTasks=[]; selReaction=""; selAction=""; selConcerns=[];
   document.getElementById("client-chips").querySelectorAll(".chip").forEach(x=>x.className="chip");
   document.getElementById("task-chips").querySelectorAll(".chip").forEach(x=>x.className="chip");
+  document.getElementById("reaction-chips").querySelectorAll(".chip").forEach(x=>x.className="chip");
+  document.getElementById("action-chips").querySelectorAll(".chip").forEach(x=>x.className="chip");
+  document.getElementById("concern-chips").querySelectorAll(".chip").forEach(x=>x.className="chip");
   document.getElementById("memo-input").value="";
   document.getElementById("add-btn").disabled=true;
   updateEntryCount();
@@ -229,22 +308,36 @@ function goFinish(){
   entries.forEach((e,i)=>{
     text += `\n${i+1}. ${e.client}\n`;
     text += `   作業：${e.tasks.join("、")}\n`;
-    if(e.memo) text += `   備考：${e.memo}\n`;
+    if(e.reaction)        text += `   顧客の反応：${e.reaction}\n`;
+    if(e.action)          text += `   次回アクション：${e.action}\n`;
+    if(e.concerns.length) text += `   懸念・課題：${e.concerns.join("、")}\n`;
+    if(e.memo)            text += `   備考：${e.memo}\n`;
   });
-  text += `\n■ 所感・申し送り\n（ここに一言を追記してください）`;
+  text += `\n■ 所感・申し送り\n`;
+
+  // AI用プロンプトを参考表示（将来的にAPI接続予定）
+  const reactions = entries.map(e=>e.reaction).filter(Boolean);
+  const actions   = entries.map(e=>e.action).filter(Boolean);
+  const concerns  = entries.flatMap(e=>e.concerns).filter(Boolean);
+  let aiHint = "（以下を参考に所感を追記してください）\n";
+  if(reactions.length) aiHint += `顧客反応：${[...new Set(reactions)].join("、")}　`;
+  if(actions.length)   aiHint += `次回：${[...new Set(actions)].join("、")}　`;
+  if(concerns.length)  aiHint += `懸念：${[...new Set(concerns)].join("、")}`;
+  text += aiHint;
+
   document.getElementById("report-text").value = text;
   show("report");
 }
 
 function showDone(){
   const report = document.getElementById("report-text").value;
-  document.getElementById("done-name").textContent = "お疲れ様でした、"+currentUser.name+";
+  document.getElementById("done-name").textContent = "お疲れ様でした、"+currentUser.name+"さん";
   document.getElementById("done-report").textContent = report;
   show("done");
 }
 
 function reset(){
-  currentUser=null; entries=[]; selClient=""; selTasks=[];
+  currentUser=null; entries=[]; selClient=""; selTasks=[]; selReaction=""; selAction=""; selConcerns=[];
   document.getElementById("pin-input").value="";
   show("pin");
 }
