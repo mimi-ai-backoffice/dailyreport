@@ -144,10 +144,48 @@ textarea {
 <div class="wrapper">
 
 <!-- ヘッダー -->
-<div class="card" style="text-align:center; padding:1rem;">
-  <div class="header-sub" style="font-size:11px; color:var(--color-text-tertiary); letter-spacing:2px;">DAILY REPORT</div>
-  <div class="header-title" style="font-size:18px; font-weight:500; color:var(--color-text-primary);">営業日報</div>
-  <div class="header-date" id="today-date" style="font-size:12px; color:var(--color-text-tertiary); margin-top:2px;"></div>
+<div class="card" style="padding:1rem; position:relative;">
+  <div style="text-align:center;">
+    <div class="header-sub" style="font-size:11px; color:var(--color-text-tertiary); letter-spacing:2px;">DAILY REPORT</div>
+    <div class="header-title" style="font-size:18px; font-weight:500; color:var(--color-text-primary);">営業日報</div>
+    <div class="header-date" id="today-date" style="font-size:12px; color:var(--color-text-tertiary); margin-top:2px;"></div>
+  </div>
+  <!-- 設定ボタン -->
+  <button onclick="toggleSettings()" title="設定"
+    style="position:absolute; top:12px; right:12px; background:none; border:none; cursor:pointer;
+           color:var(--color-text-tertiary); font-size:18px; padding:4px;">⚙</button>
+</div>
+
+<!-- 設定パネル -->
+<div id="panel-settings" style="display:none;">
+  <div class="card" style="border-color:var(--color-border-info);">
+    <div style="font-size:13px; font-weight:500; color:var(--color-text-primary); margin-bottom:16px;">⚙ 接続設定</div>
+
+    <!-- GAS URL -->
+    <div class="label">① GAS URL <span class="req">*</span></div>
+    <input type="url" id="setting-gas-url" placeholder="https://script.google.com/macros/s/..."
+      style="width:100%; padding:10px; border-radius:var(--border-radius-md);
+             border:0.5px solid var(--color-border-secondary);
+             background:var(--color-background-secondary);
+             color:var(--color-text-primary); font-size:12px; margin-bottom:4px;" />
+    <div style="font-size:11px; color:var(--color-text-tertiary); margin-bottom:16px;">
+      GASを「ウェブアプリとして導入」したときに発行されるURLを貼る
+    </div>
+
+    <!-- SHEET_ID の案内（入力はGAS側で行う） -->
+    <div class="label">② SHEET_ID（GAS側で設定）</div>
+    <div style="font-size:11px; color:var(--color-text-tertiary); line-height:1.8; margin-bottom:8px;
+                background:var(--color-background-secondary); padding:10px;
+                border-radius:var(--border-radius-md);">
+      GASエディタ → 左メニュー「プロジェクトの設定」<br>
+      → スクリプトプロパティ → プロパティを追加<br>
+      <span style="color:var(--color-text-primary);">キー：<strong>SHEET_ID</strong>　値：スプレッドシートのID</span>
+    </div>
+
+    <div id="settings-status" style="font-size:12px; min-height:16px; margin-bottom:8px;"></div>
+    <button onclick="saveSettings()" class="btn-success" style="margin-top:0;">保存する</button>
+    <button onclick="toggleSettings()" class="btn-sub">閉じる</button>
+  </div>
 </div>
 
 <!-- PIN画面 -->
@@ -256,6 +294,27 @@ textarea {
 </div><!-- /wrapper -->
 
 <script>
+// GAS URLは設定画面から入力・localStorageに保存
+function getGasUrl() {
+  return localStorage.getItem("nippo_gas_url") || "";
+}
+function toggleSettings() {
+  const panel = document.getElementById("panel-settings");
+  const isOpen = panel.style.display !== "none";
+  panel.style.display = isOpen ? "none" : "block";
+  if (!isOpen) {
+    document.getElementById("setting-gas-url").value = getGasUrl();
+    document.getElementById("settings-status").textContent = "";
+  }
+}
+function saveSettings() {
+  const url = document.getElementById("setting-gas-url").value.trim();
+  localStorage.setItem("nippo_gas_url", url);
+  const st = document.getElementById("settings-status");
+  st.style.color = "var(--color-text-success)";
+  st.textContent = "✅ 保存しました";
+}
+
 const USERS = {
   "1234": { name:"田中太郎", clients:["A商事","B工業","C物産","D建設"] },
   "5678": { name:"佐藤花子", clients:["E商店","F工業","G物産"] },
@@ -432,9 +491,41 @@ function goFinish(){
 
 function showDone(){
   const report = document.getElementById("report-text").value;
-  document.getElementById("done-name").textContent = "お疲れ様でした、"+currentUser.name+"さん";
-  document.getElementById("done-report").textContent = report;
-  show("done");
+  const btn = document.querySelector("#screen-report .btn-success");
+  btn.textContent = "送信中…";
+  btn.disabled = true;
+
+  const payload = {
+    userName:   currentUser.name,
+    date:       d.toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"}),
+    entries:    entries,
+    reportText: report
+  };
+
+  const gasUrl = getGasUrl();
+  if (!gasUrl) {
+    // URL未設定の場合はそのまま完了画面へ
+    document.getElementById("done-name").textContent = "お疲れ様でした、"+currentUser.name+"さん";
+    document.getElementById("done-report").textContent = report;
+    btn.textContent = "この内容で確定する";
+    btn.disabled = false;
+    show("done");
+    return;
+  }
+
+  fetch(gasUrl, {
+    method: "POST",
+    mode:   "no-cors",
+    body:   JSON.stringify(payload)
+  })
+  .catch(() => {})  // no-corsではレスポンスが読めないため無視
+  .finally(() => {
+    document.getElementById("done-name").textContent = "お疲れ様でした、"+currentUser.name+"さん";
+    document.getElementById("done-report").textContent = report;
+    btn.textContent = "この内容で確定する";
+    btn.disabled = false;
+    show("done");
+  });
 }
 
 function reset(){
