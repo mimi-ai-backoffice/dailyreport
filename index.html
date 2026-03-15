@@ -227,7 +227,6 @@ textarea {
 
   <button class="btn-main" id="add-btn" disabled onclick="addEntry()">この記録を追加 ＋</button>
   <button class="btn-success" id="finish-btn" style="display:none;" onclick="goFinish()">日報をまとめる →</button>
-  <button class="btn-sub" id="skip-btn" style="display:none;" onclick="goFinish()">記録はこれで終わり → まとめへ</button>
 </div>
 
 <!-- 日報まとめ画面 -->
@@ -363,7 +362,6 @@ function updateEntryCount(){
   document.getElementById("entry-count").textContent = entries.length>0 ? entries.length+"件記録済み" : "";
   document.getElementById("entries-card").style.display  = entries.length>0 ? "block" : "none";
   document.getElementById("finish-btn").style.display    = entries.length>0 ? "block" : "none";
-  document.getElementById("skip-btn").style.display      = entries.length>0 ? "block" : "none";
   renderEntries();
   updateStepBar();
 }
