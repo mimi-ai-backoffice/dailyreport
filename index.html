@@ -1,0 +1,255 @@
+
+<style>
+.chip { display:inline-block; padding:6px 14px; border-radius:20px; font-size:13px; cursor:pointer; border:0.5px solid var(--color-border-secondary); background:var(--color-background-secondary); color:var(--color-text-secondary); margin:4px; transition:all 0.15s; }
+.chip.active-blue { background:var(--color-background-info); color:var(--color-text-info); border-color:var(--color-border-info); }
+.chip.active-green { background:var(--color-background-success); color:var(--color-text-success); border-color:var(--color-border-success); }
+.card { background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:1rem 1.25rem; margin-bottom:12px; }
+.label { font-size:12px; color:var(--color-text-secondary); margin-bottom:8px; }
+.req { color:var(--color-text-danger); }
+.btn-main { width:100%; padding:12px; border-radius:var(--border-radius-md); background:var(--color-background-info); color:var(--color-text-info); border:0.5px solid var(--color-border-info); font-size:14px; font-weight:500; cursor:pointer; margin-top:4px; }
+.btn-main:disabled { background:var(--color-background-secondary); color:var(--color-text-tertiary); border-color:var(--color-border-tertiary); cursor:not-allowed; }
+.btn-sub { width:100%; padding:10px; border-radius:var(--border-radius-md); background:var(--color-background-secondary); color:var(--color-text-secondary); border:0.5px solid var(--color-border-secondary); font-size:13px; cursor:pointer; margin-top:8px; }
+.btn-success { width:100%; padding:12px; border-radius:var(--border-radius-md); background:var(--color-background-success); color:var(--color-text-success); border:0.5px solid var(--color-border-success); font-size:14px; font-weight:500; cursor:pointer; margin-top:4px; }
+.entry-row { display:flex; align-items:flex-start; justify-content:space-between; padding:8px 0; border-bottom:0.5px solid var(--color-border-tertiary); font-size:13px; color:var(--color-text-primary); gap:8px; }
+.entry-row:last-child { border-bottom:none; }
+.del-btn { background:none; border:none; color:var(--color-text-danger); cursor:pointer; font-size:16px; flex-shrink:0; padding:0 4px; }
+textarea { width:100%; box-sizing:border-box; resize:vertical; padding:10px; border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-secondary); font-size:13px; color:var(--color-text-primary); background:var(--color-background-secondary); font-family:inherit; }
+.step-bar { display:flex; gap:6px; margin-bottom:16px; }
+.step-dot { height:4px; border-radius:2px; flex:1; background:var(--color-border-tertiary); }
+.step-dot.done { background:var(--color-border-info); }
+</style>
+
+<div style="max-width:380px; margin:0 auto; padding:1rem 0;">
+
+<div class="card" style="text-align:center; padding:1rem;">
+  <div style="font-size:12px; color:var(--color-text-tertiary); letter-spacing:2px;">DAILY REPORT</div>
+  <div style="font-size:18px; font-weight:500; color:var(--color-text-primary);">営業日報</div>
+  <div id="today-date" style="font-size:12px; color:var(--color-text-tertiary); margin-top:2px;"></div>
+</div>
+
+<!-- PIN -->
+<div id="screen-pin">
+  <div class="card">
+    <div class="label">4桁のPINを入力</div>
+    <div style="display:flex; gap:8px;">
+      <input type="password" id="pin-input" maxlength="4" placeholder="• • • •"
+        style="flex:1; padding:12px; font-size:22px; letter-spacing:10px; text-align:center; border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-secondary); background:var(--color-background-secondary); color:var(--color-text-primary);" />
+      <button onclick="handlePin()" class="btn-main" style="width:auto; padding:12px 20px; margin:0;">→</button>
+    </div>
+    <div id="pin-error" style="color:var(--color-text-danger); font-size:12px; margin-top:6px; min-height:14px;"></div>
+  </div>
+  <div class="card" style="background:var(--color-background-secondary);">
+    <div class="label">デモ用PIN</div>
+    <div style="font-size:13px; color:var(--color-text-secondary); line-height:2;">
+      <span style="color:var(--color-text-info); font-weight:500;">1234</span>　田中太郎<br>
+      <span style="color:var(--color-text-info); font-weight:500;">5678</span>　佐藤花子<br>
+      <span style="color:var(--color-text-info); font-weight:500;">9012</span>　加藤次郎
+    </div>
+  </div>
+</div>
+
+<!-- 記録追加 -->
+<div id="screen-add" style="display:none;">
+  <div id="step-bar" class="step-bar"></div>
+
+  <div class="card" style="display:flex; align-items:center; gap:10px; padding:0.75rem 1rem;">
+    <div id="avatar" style="width:36px;height:36px;border-radius:50%;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;font-weight:500;font-size:14px;color:var(--color-text-info);flex-shrink:0;"></div>
+    <div id="user-name" style="font-size:14px; font-weight:500; color:var(--color-text-primary);"></div>
+    <div style="margin-left:auto; font-size:12px; color:var(--color-text-tertiary);" id="entry-count"></div>
+  </div>
+
+  <!-- 記録済みリスト -->
+  <div id="entries-card" class="card" style="display:none;">
+    <div class="label">記録済み</div>
+    <div id="entries-list"></div>
+  </div>
+
+  <!-- 訪問先選択 -->
+  <div class="card">
+    <div class="label">訪問先を選ぶ <span class="req">*</span></div>
+    <div id="client-chips"></div>
+  </div>
+
+  <!-- 作業選択 -->
+  <div class="card">
+    <div class="label">作業内容 <span class="req">*</span></div>
+    <div id="task-chips"></div>
+  </div>
+
+  <!-- メモ -->
+  <div class="card">
+    <div class="label">メモ（任意）</div>
+    <textarea id="memo-input" rows="2" placeholder="次回訪問予定、など"></textarea>
+  </div>
+
+  <button class="btn-main" id="add-btn" disabled onclick="addEntry()">この記録を追加 ＋</button>
+  <button class="btn-success" id="finish-btn" style="display:none;" onclick="goFinish()">日報をまとめる →</button>
+  <button class="btn-sub" onclick="goFinish()" id="skip-btn" style="display:none;">記録はこれで終わり → まとめへ</button>
+</div>
+
+<!-- 日報まとめ -->
+<div id="screen-report" style="display:none;">
+  <div class="card">
+    <div class="label">日報（編集できます）</div>
+    <textarea id="report-text" rows="14" style="font-size:13px; line-height:1.8;"></textarea>
+  </div>
+  <button class="btn-success" onclick="showDone()">この内容で確定する</button>
+  <button class="btn-sub" onclick="show('add')">← 記録に戻る</button>
+</div>
+
+<!-- 完了 -->
+<div id="screen-done" style="display:none;">
+  <div class="card" style="text-align:center; padding:2rem 1.25rem;">
+    <div style="width:52px;height:52px;border-radius:50%;background:var(--color-background-success);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:22px; color:var(--color-text-success);">✓</div>
+    <div style="font-size:17px; font-weight:500; color:var(--color-text-primary); margin-bottom:6px;">送信完了！</div>
+    <div id="done-name" style="font-size:13px; color:var(--color-text-secondary);"></div>
+  </div>
+  <div class="card" style="background:var(--color-background-secondary);">
+    <div class="label">提出した日報</div>
+    <pre id="done-report" style="font-size:12px; color:var(--color-text-primary); white-space:pre-wrap; line-height:1.8; margin:0;"></pre>
+  </div>
+  <button class="btn-sub" onclick="reset()">最初に戻る</button>
+</div>
+
+</div>
+
+<script>
+const USERS = {
+  "1234": { name:"田中太郎", clients:["A商事","B工業","C物産","D建設"] },
+  "5678": { name:"佐藤花子", clients:["E商店","F工業","G物産"] },
+  "9012": { name:"加藤次郎", clients:["H商事","I建設","J工業","K物産"] }
+};
+const TASKS = ["訪問","見積作成・提出","商談","受注","電話・メール対応","社内事務","その他"];
+
+let currentUser=null, entries=[], selClient="", selTasks=[];
+
+const d = new Date();
+document.getElementById("today-date").textContent = d.toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"});
+document.getElementById("pin-input").addEventListener("keydown", e=>{ if(e.key==="Enter") handlePin(); });
+
+function handlePin(){
+  const pin = document.getElementById("pin-input").value;
+  if(USERS[pin]){
+    currentUser = USERS[pin];
+    document.getElementById("pin-error").textContent = "";
+    document.getElementById("user-name").textContent = currentUser.name;
+    document.getElementById("avatar").textContent = currentUser.name[0];
+    buildChips();
+    updateEntryCount();
+    show("add");
+  } else {
+    document.getElementById("pin-error").textContent = "PINが違います";
+    document.getElementById("pin-input").value = "";
+  }
+}
+
+function buildChips(){
+  const cc = document.getElementById("client-chips");
+  cc.innerHTML="";
+  currentUser.clients.forEach(c=>{
+    const b=document.createElement("button");
+    b.className="chip"; b.textContent=c;
+    b.onclick=()=>{
+      selClient = selClient===c ? "" : c;
+      cc.querySelectorAll(".chip").forEach(x=>x.className="chip");
+      if(selClient) b.className="chip active-green";
+      updateAddBtn();
+    };
+    cc.appendChild(b);
+  });
+
+  const tc = document.getElementById("task-chips");
+  tc.innerHTML="";
+  TASKS.forEach(t=>{
+    const b=document.createElement("button");
+    b.className="chip"; b.textContent=t;
+    b.onclick=()=>{
+      if(selTasks.includes(t)){ selTasks=selTasks.filter(x=>x!==t); b.className="chip"; }
+      else { selTasks.push(t); b.className="chip active-blue"; }
+      updateAddBtn();
+    };
+    tc.appendChild(b);
+  });
+}
+
+function updateAddBtn(){
+  document.getElementById("add-btn").disabled = !(selClient && selTasks.length>0);
+}
+
+function updateEntryCount(){
+  const ec = document.getElementById("entry-count");
+  ec.textContent = entries.length>0 ? entries.length+"件記録済み" : "";
+  const ec2 = document.getElementById("entries-card");
+  ec2.style.display = entries.length>0 ? "block" : "none";
+  document.getElementById("finish-btn").style.display = entries.length>0 ? "block" : "none";
+  document.getElementById("skip-btn").style.display = entries.length>0 ? "block" : "none";
+  renderEntries();
+  updateStepBar();
+}
+
+function renderEntries(){
+  const el = document.getElementById("entries-list");
+  el.innerHTML="";
+  entries.forEach((e,i)=>{
+    const row=document.createElement("div");
+    row.className="entry-row";
+    row.innerHTML=`<div><span style="color:var(--color-text-success);font-weight:500;">${e.client}</span><br><span style="color:var(--color-text-secondary);">${e.tasks.join("・")}</span>${e.memo?`<br><span style="color:var(--color-text-tertiary);font-size:12px;">${e.memo}</span>`:""}</div><button class="del-btn" onclick="deleteEntry(${i})">×</button>`;
+    el.appendChild(row);
+  });
+}
+
+function deleteEntry(i){ entries.splice(i,1); updateEntryCount(); }
+
+function updateStepBar(){
+  const bar = document.getElementById("step-bar");
+  bar.innerHTML="";
+  const total = Math.max(entries.length+1, 2);
+  for(let i=0;i<total;i++){
+    const d2=document.createElement("div");
+    d2.className="step-dot"+(i<entries.length?" done":"");
+    bar.appendChild(d2);
+  }
+}
+
+function addEntry(){
+  const memo = document.getElementById("memo-input").value.trim();
+  entries.push({ client:selClient, tasks:[...selTasks], memo });
+  selClient=""; selTasks=[];
+  document.getElementById("client-chips").querySelectorAll(".chip").forEach(x=>x.className="chip");
+  document.getElementById("task-chips").querySelectorAll(".chip").forEach(x=>x.className="chip");
+  document.getElementById("memo-input").value="";
+  document.getElementById("add-btn").disabled=true;
+  updateEntryCount();
+}
+
+function goFinish(){
+  const dateStr = d.toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"});
+  let text = `【営業日報】\n氏名：${currentUser.name}\n日付：${dateStr}\n\n`;
+  text += `■ 本日の活動記録\n`;
+  entries.forEach((e,i)=>{
+    text += `\n${i+1}. ${e.client}\n`;
+    text += `   作業：${e.tasks.join("、")}\n`;
+    if(e.memo) text += `   備考：${e.memo}\n`;
+  });
+  text += `\n■ 所感・申し送り\n（ここに一言を追記してください）`;
+  document.getElementById("report-text").value = text;
+  show("report");
+}
+
+function showDone(){
+  const report = document.getElementById("report-text").value;
+  document.getElementById("done-name").textContent = "お疲れ様でした、"+currentUser.name+"さん";
+  document.getElementById("done-report").textContent = report;
+  show("done");
+}
+
+function reset(){
+  currentUser=null; entries=[]; selClient=""; selTasks=[];
+  document.getElementById("pin-input").value="";
+  show("pin");
+}
+
+function show(s){
+  ["pin","add","report","done"].forEach(x=>document.getElementById("screen-"+x).style.display=x===s?"block":"none");
+}
+</script>
