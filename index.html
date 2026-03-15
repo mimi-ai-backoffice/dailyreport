@@ -1,51 +1,176 @@
 
+// v1.2 (2026-03-15) PC・スマホ両対応のレスポンシブデザインに調整
 // v1.1 (2026-03-15) 顧客の反応・次回アクション・懸念課題のチップを追加
 // v1.0 (2026-03-15) 初版
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-.chip { display:inline-block; padding:6px 14px; border-radius:20px; font-size:13px; cursor:pointer; border:0.5px solid var(--color-border-secondary); background:var(--color-background-secondary); color:var(--color-text-secondary); margin:4px; transition:all 0.15s; }
-.chip.active-blue { background:var(--color-background-info); color:var(--color-text-info); border-color:var(--color-border-info); }
-.chip.active-green { background:var(--color-background-success); color:var(--color-text-success); border-color:var(--color-border-success); }
-.chip.active-orange { background:var(--color-background-warning); color:var(--color-text-warning); border-color:var(--color-border-warning); }
-.card { background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:1rem 1.25rem; margin-bottom:12px; }
-.label { font-size:12px; color:var(--color-text-secondary); margin-bottom:8px; }
-.req { color:var(--color-text-danger); }
-.opt { color:var(--color-text-tertiary); font-size:11px; }
-.btn-main { width:100%; padding:12px; border-radius:var(--border-radius-md); background:var(--color-background-info); color:var(--color-text-info); border:0.5px solid var(--color-border-info); font-size:14px; font-weight:500; cursor:pointer; margin-top:4px; }
-.btn-main:disabled { background:var(--color-background-secondary); color:var(--color-text-tertiary); border-color:var(--color-border-tertiary); cursor:not-allowed; }
-.btn-sub { width:100%; padding:10px; border-radius:var(--border-radius-md); background:var(--color-background-secondary); color:var(--color-text-secondary); border:0.5px solid var(--color-border-secondary); font-size:13px; cursor:pointer; margin-top:8px; }
-.btn-success { width:100%; padding:12px; border-radius:var(--border-radius-md); background:var(--color-background-success); color:var(--color-text-success); border:0.5px solid var(--color-border-success); font-size:14px; font-weight:500; cursor:pointer; margin-top:4px; }
-.entry-row { display:flex; align-items:flex-start; justify-content:space-between; padding:8px 0; border-bottom:0.5px solid var(--color-border-tertiary); font-size:13px; color:var(--color-text-primary); gap:8px; }
-.entry-row:last-child { border-bottom:none; }
-.del-btn { background:none; border:none; color:var(--color-text-danger); cursor:pointer; font-size:16px; flex-shrink:0; padding:0 4px; }
-textarea { width:100%; box-sizing:border-box; resize:vertical; padding:10px; border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-secondary); font-size:13px; color:var(--color-text-primary); background:var(--color-background-secondary); font-family:inherit; }
-.step-bar { display:flex; gap:6px; margin-bottom:16px; }
-.step-dot { height:4px; border-radius:2px; flex:1; background:var(--color-border-tertiary); }
-.step-dot.done { background:var(--color-border-info); }
+/* ベース */
+* { box-sizing: border-box; }
+
+.chip {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 0.5px solid var(--color-border-secondary);
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  margin: 4px;
+  transition: all 0.15s;
+}
+.chip.active-blue   { background:var(--color-background-info);    color:var(--color-text-info);    border-color:var(--color-border-info); }
+.chip.active-green  { background:var(--color-background-success);  color:var(--color-text-success);  border-color:var(--color-border-success); }
+.chip.active-orange { background:var(--color-background-warning);  color:var(--color-text-warning);  border-color:var(--color-border-warning); }
+
+.card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 1rem 1.25rem;
+  margin-bottom: 12px;
+}
+.label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 8px; }
+.req   { color: var(--color-text-danger); }
+.opt   { color: var(--color-text-tertiary); font-size: 11px; }
+
+.btn-main {
+  width: 100%; padding: 12px;
+  border-radius: var(--border-radius-md);
+  background: var(--color-background-info); color: var(--color-text-info); border: 0.5px solid var(--color-border-info);
+  font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 4px;
+}
+.btn-main:disabled {
+  background: var(--color-background-secondary); color: var(--color-text-tertiary);
+  border-color: var(--color-border-tertiary); cursor: not-allowed;
+}
+.btn-sub {
+  width: 100%; padding: 10px;
+  border-radius: var(--border-radius-md);
+  background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-secondary);
+  font-size: 13px; cursor: pointer; margin-top: 8px;
+}
+.btn-success {
+  width: 100%; padding: 12px;
+  border-radius: var(--border-radius-md);
+  background: var(--color-background-success); color: var(--color-text-success); border: 0.5px solid var(--color-border-success);
+  font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 4px;
+}
+
+.entry-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary);
+  font-size: 13px; color: var(--color-text-primary); gap: 8px;
+}
+.entry-row:last-child { border-bottom: none; }
+.del-btn { background: none; border: none; color: var(--color-text-danger); cursor: pointer; font-size: 16px; flex-shrink: 0; padding: 0 4px; }
+
+textarea {
+  width: 100%; resize: vertical; padding: 10px;
+  border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--color-border-secondary);
+  font-size: 13px; color: var(--color-text-primary);
+  background: var(--color-background-secondary); font-family: inherit;
+}
+
+.step-bar  { display: flex; gap: 6px; margin-bottom: 16px; }
+.step-dot  { height: 4px; border-radius: 2px; flex: 1; background: var(--color-border-tertiary); }
+.step-dot.done { background: var(--color-border-info); }
+
+/* ラッパー：スマホは全幅、PCは中央寄せカード */
+.wrapper {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+}
+
+/* PC（640px以上）向け調整 */
+@media (min-width: 640px) {
+  .wrapper {
+    max-width: 640px;
+    padding: 2rem 1.5rem;
+  }
+
+  /* チップを横並びで広めに */
+  .chip {
+    font-size: 14px;
+    padding: 8px 18px;
+    margin: 5px;
+  }
+
+  /* カードの余白広め */
+  .card {
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 16px;
+  }
+
+  .label { font-size: 13px; margin-bottom: 10px; }
+
+  .btn-main, .btn-success, .btn-sub {
+    font-size: 15px;
+    padding: 14px;
+  }
+
+  /* ヘッダータイトル */
+  .header-title { font-size: 22px !important; }
+  .header-sub   { font-size: 13px !important; letter-spacing: 3px; }
+  .header-date  { font-size: 13px !important; }
+
+  /* PINと確認ボタンを横並びにする */
+  #pin-row { gap: 12px; }
+  #pin-input-field { font-size: 26px !important; }
+
+  /* 記録済みエントリの文字 */
+  .entry-row { font-size: 14px; padding: 10px 0; }
+
+  /* テキストエリア */
+  textarea { font-size: 14px; }
+
+  /* ユーザーバー */
+  #user-name { font-size: 16px !important; }
+
+  /* 完了アイコン */
+  .done-icon { width: 64px !important; height: 64px !important; font-size: 28px !important; }
+  .done-title { font-size: 20px !important; }
+}
+
+/* スマホ（480px未満）向け微調整 */
+@media (max-width: 479px) {
+  .wrapper { padding: 0.5rem 0.75rem; }
+  .chip { font-size: 12px; padding: 5px 11px; margin: 3px; }
+  .card { padding: 0.85rem 1rem; margin-bottom: 10px; }
+  .btn-main, .btn-success, .btn-sub { padding: 11px; font-size: 13px; }
+}
 </style>
 
-<div style="max-width:380px; margin:0 auto; padding:1rem 0;">
+<div class="wrapper">
 
+<!-- ヘッダー -->
 <div class="card" style="text-align:center; padding:1rem;">
-  <div style="font-size:12px; color:var(--color-text-tertiary); letter-spacing:2px;">DAILY REPORT</div>
-  <div style="font-size:18px; font-weight:500; color:var(--color-text-primary);">営業日報</div>
-  <div id="today-date" style="font-size:12px; color:var(--color-text-tertiary); margin-top:2px;"></div>
+  <div class="header-sub" style="font-size:11px; color:var(--color-text-tertiary); letter-spacing:2px;">DAILY REPORT</div>
+  <div class="header-title" style="font-size:18px; font-weight:500; color:var(--color-text-primary);">営業日報</div>
+  <div class="header-date" id="today-date" style="font-size:12px; color:var(--color-text-tertiary); margin-top:2px;"></div>
 </div>
 
-<!-- PIN -->
+<!-- PIN画面 -->
 <div id="screen-pin">
   <div class="card">
     <div class="label">4桁のPINを入力</div>
-    <div style="display:flex; gap:8px;">
-      <input type="password" id="pin-input" maxlength="4" placeholder="• • • •"
-        style="flex:1; padding:12px; font-size:22px; letter-spacing:10px; text-align:center; border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-secondary); background:var(--color-background-secondary); color:var(--color-text-primary);" />
+    <div id="pin-row" style="display:flex; gap:8px;">
+      <input type="password" id="pin-input-field" maxlength="4" placeholder="• • • •"
+        style="flex:1; padding:12px; font-size:22px; letter-spacing:10px; text-align:center;
+               border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-secondary);
+               background:var(--color-background-secondary); color:var(--color-text-primary);" />
       <button onclick="handlePin()" class="btn-main" style="width:auto; padding:12px 20px; margin:0;">→</button>
     </div>
     <div id="pin-error" style="color:var(--color-text-danger); font-size:12px; margin-top:6px; min-height:14px;"></div>
   </div>
   <div class="card" style="background:var(--color-background-secondary);">
     <div class="label">デモ用PIN</div>
-    <div style="font-size:13px; color:var(--color-text-secondary); line-height:2;">
+    <div style="font-size:13px; color:var(--color-text-secondary); line-height:2.2;">
       <span style="color:var(--color-text-info); font-weight:500;">1234</span>　田中太郎<br>
       <span style="color:var(--color-text-info); font-weight:500;">5678</span>　佐藤花子<br>
       <span style="color:var(--color-text-info); font-weight:500;">9012</span>　加藤次郎
@@ -53,12 +178,12 @@ textarea { width:100%; box-sizing:border-box; resize:vertical; padding:10px; bor
   </div>
 </div>
 
-<!-- 記録追加 -->
+<!-- 記録追加画面 -->
 <div id="screen-add" style="display:none;">
   <div id="step-bar" class="step-bar"></div>
 
   <div class="card" style="display:flex; align-items:center; gap:10px; padding:0.75rem 1rem;">
-    <div id="avatar" style="width:36px;height:36px;border-radius:50%;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;font-weight:500;font-size:14px;color:var(--color-text-info);flex-shrink:0;"></div>
+    <div id="avatar" style="width:38px;height:38px;border-radius:50%;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;font-weight:500;font-size:15px;color:var(--color-text-info);flex-shrink:0;"></div>
     <div id="user-name" style="font-size:14px; font-weight:500; color:var(--color-text-primary);"></div>
     <div style="margin-left:auto; font-size:12px; color:var(--color-text-tertiary);" id="entry-count"></div>
   </div>
@@ -69,13 +194,13 @@ textarea { width:100%; box-sizing:border-box; resize:vertical; padding:10px; bor
     <div id="entries-list"></div>
   </div>
 
-  <!-- 訪問先選択 -->
+  <!-- 訪問先 -->
   <div class="card">
     <div class="label">訪問先を選ぶ <span class="req">*</span></div>
     <div id="client-chips"></div>
   </div>
 
-  <!-- 作業選択 -->
+  <!-- 作業内容 -->
   <div class="card">
     <div class="label">作業内容 <span class="req">*</span></div>
     <div id="task-chips"></div>
@@ -107,10 +232,10 @@ textarea { width:100%; box-sizing:border-box; resize:vertical; padding:10px; bor
 
   <button class="btn-main" id="add-btn" disabled onclick="addEntry()">この記録を追加 ＋</button>
   <button class="btn-success" id="finish-btn" style="display:none;" onclick="goFinish()">日報をまとめる →</button>
-  <button class="btn-sub" onclick="goFinish()" id="skip-btn" style="display:none;">記録はこれで終わり → まとめへ</button>
+  <button class="btn-sub" id="skip-btn" style="display:none;" onclick="goFinish()">記録はこれで終わり → まとめへ</button>
 </div>
 
-<!-- 日報まとめ -->
+<!-- 日報まとめ画面 -->
 <div id="screen-report" style="display:none;">
   <div class="card">
     <div class="label">日報（編集できます）</div>
@@ -120,11 +245,11 @@ textarea { width:100%; box-sizing:border-box; resize:vertical; padding:10px; bor
   <button class="btn-sub" onclick="show('add')">← 記録に戻る</button>
 </div>
 
-<!-- 完了 -->
+<!-- 完了画面 -->
 <div id="screen-done" style="display:none;">
   <div class="card" style="text-align:center; padding:2rem 1.25rem;">
-    <div style="width:52px;height:52px;border-radius:50%;background:var(--color-background-success);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:22px; color:var(--color-text-success);">✓</div>
-    <div style="font-size:17px; font-weight:500; color:var(--color-text-primary); margin-bottom:6px;">送信完了！</div>
+    <div class="done-icon" style="width:52px;height:52px;border-radius:50%;background:var(--color-background-success);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:22px;color:var(--color-text-success);">✓</div>
+    <div class="done-title" style="font-size:17px; font-weight:500; color:var(--color-text-primary); margin-bottom:6px;">送信完了！</div>
     <div id="done-name" style="font-size:13px; color:var(--color-text-secondary);"></div>
   </div>
   <div class="card" style="background:var(--color-background-secondary);">
@@ -134,7 +259,7 @@ textarea { width:100%; box-sizing:border-box; resize:vertical; padding:10px; bor
   <button class="btn-sub" onclick="reset()">最初に戻る</button>
 </div>
 
-</div>
+</div><!-- /wrapper -->
 
 <script>
 const USERS = {
@@ -151,10 +276,10 @@ let currentUser=null, entries=[], selClient="", selTasks=[], selReaction="", sel
 
 const d = new Date();
 document.getElementById("today-date").textContent = d.toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"});
-document.getElementById("pin-input").addEventListener("keydown", e=>{ if(e.key==="Enter") handlePin(); });
+document.getElementById("pin-input-field").addEventListener("keydown", e=>{ if(e.key==="Enter") handlePin(); });
 
 function handlePin(){
-  const pin = document.getElementById("pin-input").value;
+  const pin = document.getElementById("pin-input-field").value;
   if(USERS[pin]){
     currentUser = USERS[pin];
     document.getElementById("pin-error").textContent = "";
@@ -165,29 +290,53 @@ function handlePin(){
     show("add");
   } else {
     document.getElementById("pin-error").textContent = "PINが違います";
-    document.getElementById("pin-input").value = "";
+    document.getElementById("pin-input-field").value = "";
   }
 }
 
-function buildChips(){
-  // 訪問先
-  const cc = document.getElementById("client-chips");
-  cc.innerHTML="";
-  currentUser.clients.forEach(c=>{
-    const b=document.createElement("button");
-    b.className="chip"; b.textContent=c;
-    b.onclick=()=>{
-      selClient = selClient===c ? "" : c;
-      cc.querySelectorAll(".chip").forEach(x=>x.className="chip");
-      if(selClient) b.className="chip active-green";
-      updateAddBtn();
+function buildSingleChips(containerId, items, getter, setter, colorClass){
+  const c = document.getElementById(containerId);
+  c.innerHTML = "";
+  items.forEach(item => {
+    const b = document.createElement("button");
+    b.className = "chip"; b.textContent = item;
+    b.onclick = () => {
+      setter(getter() === item ? "" : item);
+      c.querySelectorAll(".chip").forEach(x => x.className = "chip");
+      if(getter()) b.className = "chip " + colorClass;
     };
-    cc.appendChild(b);
+    c.appendChild(b);
   });
+}
 
-  // 作業内容
-  const tc = document.getElementById("task-chips");
-  tc.innerHTML="";
+function buildMultiChips(containerId, items, arr, colorClass){
+  const c = document.getElementById(containerId);
+  c.innerHTML = "";
+  items.forEach(item => {
+    const b = document.createElement("button");
+    b.className = "chip"; b.textContent = item;
+    b.onclick = () => {
+      if(arr.includes(item)){ arr.splice(arr.indexOf(item),1); b.className="chip"; }
+      else { arr.push(item); b.className="chip " + colorClass; }
+    };
+    c.appendChild(b);
+  });
+}
+
+function buildChips(){
+  // 訪問先（単一）
+  buildSingleChips("client-chips", currentUser.clients,
+    ()=>selClient, v=>{ selClient=v; updateAddBtn(); }, "active-green");
+
+  // 作業内容（複数）
+  buildMultiChips("task-chips", TASKS, selTasks, "active-blue");
+  // 作業チップはクリック時にaddBtnも更新
+  document.getElementById("task-chips").querySelectorAll(".chip").forEach((b,i)=>{
+    const orig = b.onclick;
+    b.onclick = ()=>{ orig && orig(); updateAddBtn(); };
+  });
+  // 作業を再構築してupdateAddBtnを埋め込む
+  const tc = document.getElementById("task-chips"); tc.innerHTML="";
   TASKS.forEach(t=>{
     const b=document.createElement("button");
     b.className="chip"; b.textContent=t;
@@ -199,46 +348,16 @@ function buildChips(){
     tc.appendChild(b);
   });
 
-  // 顧客の反応（単一選択）
-  const rc = document.getElementById("reaction-chips");
-  rc.innerHTML="";
-  REACTIONS.forEach(r=>{
-    const b=document.createElement("button");
-    b.className="chip"; b.textContent=r;
-    b.onclick=()=>{
-      selReaction = selReaction===r ? "" : r;
-      rc.querySelectorAll(".chip").forEach(x=>x.className="chip");
-      if(selReaction) b.className="chip active-green";
-    };
-    rc.appendChild(b);
-  });
+  // 顧客の反応（単一）
+  buildSingleChips("reaction-chips", REACTIONS,
+    ()=>selReaction, v=>{ selReaction=v; }, "active-green");
 
-  // 次回アクション（単一選択）
-  const ac = document.getElementById("action-chips");
-  ac.innerHTML="";
-  ACTIONS.forEach(a=>{
-    const b=document.createElement("button");
-    b.className="chip"; b.textContent=a;
-    b.onclick=()=>{
-      selAction = selAction===a ? "" : a;
-      ac.querySelectorAll(".chip").forEach(x=>x.className="chip");
-      if(selAction) b.className="chip active-blue";
-    };
-    ac.appendChild(b);
-  });
+  // 次回アクション（単一）
+  buildSingleChips("action-chips", ACTIONS,
+    ()=>selAction, v=>{ selAction=v; }, "active-blue");
 
-  // 懸念・課題（複数選択）
-  const cnc = document.getElementById("concern-chips");
-  cnc.innerHTML="";
-  CONCERNS.forEach(c=>{
-    const b=document.createElement("button");
-    b.className="chip"; b.textContent=c;
-    b.onclick=()=>{
-      if(selConcerns.includes(c)){ selConcerns=selConcerns.filter(x=>x!==c); b.className="chip"; }
-      else { selConcerns.push(c); b.className="chip active-orange"; }
-    };
-    cnc.appendChild(b);
-  });
+  // 懸念・課題（複数）
+  buildMultiChips("concern-chips", CONCERNS, selConcerns, "active-orange");
 }
 
 function updateAddBtn(){
@@ -246,28 +365,27 @@ function updateAddBtn(){
 }
 
 function updateEntryCount(){
-  const ec = document.getElementById("entry-count");
-  ec.textContent = entries.length>0 ? entries.length+"件記録済み" : "";
-  document.getElementById("entries-card").style.display = entries.length>0 ? "block" : "none";
-  document.getElementById("finish-btn").style.display = entries.length>0 ? "block" : "none";
-  document.getElementById("skip-btn").style.display = entries.length>0 ? "block" : "none";
+  document.getElementById("entry-count").textContent = entries.length>0 ? entries.length+"件記録済み" : "";
+  document.getElementById("entries-card").style.display  = entries.length>0 ? "block" : "none";
+  document.getElementById("finish-btn").style.display    = entries.length>0 ? "block" : "none";
+  document.getElementById("skip-btn").style.display      = entries.length>0 ? "block" : "none";
   renderEntries();
   updateStepBar();
 }
 
 function renderEntries(){
   const el = document.getElementById("entries-list");
-  el.innerHTML="";
+  el.innerHTML = "";
   entries.forEach((e,i)=>{
-    const row=document.createElement("div");
-    row.className="entry-row";
+    const row = document.createElement("div");
+    row.className = "entry-row";
     let detail = `<span style="color:var(--color-text-success);font-weight:500;">${e.client}</span><br>`;
     detail += `<span style="color:var(--color-text-secondary);">${e.tasks.join("・")}</span>`;
-    if(e.reaction) detail += `<br><span style="font-size:12px; color:var(--color-text-success);">反応：${e.reaction}</span>`;
-    if(e.action)   detail += `<br><span style="font-size:12px; color:var(--color-text-info);">次回：${e.action}</span>`;
-    if(e.concerns.length>0) detail += `<br><span style="font-size:12px; color:var(--color-text-warning);">懸念：${e.concerns.join("・")}</span>`;
-    if(e.memo)     detail += `<br><span style="color:var(--color-text-tertiary);font-size:12px;">${e.memo}</span>`;
-    row.innerHTML=`<div>${detail}</div><button class="del-btn" onclick="deleteEntry(${i})">×</button>`;
+    if(e.reaction)        detail += `<br><span style="font-size:12px;color:var(--color-text-success);">反応：${e.reaction}</span>`;
+    if(e.action)          detail += `<br><span style="font-size:12px;color:var(--color-text-info);">次回：${e.action}</span>`;
+    if(e.concerns.length) detail += `<br><span style="font-size:12px;color:var(--color-text-warning);">懸念：${e.concerns.join("・")}</span>`;
+    if(e.memo)            detail += `<br><span style="font-size:12px;color:var(--color-text-tertiary);">${e.memo}</span>`;
+    row.innerHTML = `<div>${detail}</div><button class="del-btn" onclick="deleteEntry(${i})">×</button>`;
     el.appendChild(row);
   });
 }
@@ -276,11 +394,11 @@ function deleteEntry(i){ entries.splice(i,1); updateEntryCount(); }
 
 function updateStepBar(){
   const bar = document.getElementById("step-bar");
-  bar.innerHTML="";
+  bar.innerHTML = "";
   const total = Math.max(entries.length+1, 2);
   for(let i=0;i<total;i++){
-    const dot=document.createElement("div");
-    dot.className="step-dot"+(i<entries.length?" done":"");
+    const dot = document.createElement("div");
+    dot.className = "step-dot"+(i<entries.length?" done":"");
     bar.appendChild(dot);
   }
 }
@@ -288,23 +406,16 @@ function updateStepBar(){
 function addEntry(){
   const memo = document.getElementById("memo-input").value.trim();
   entries.push({ client:selClient, tasks:[...selTasks], reaction:selReaction, action:selAction, concerns:[...selConcerns], memo });
-
-  // リセット
   selClient=""; selTasks=[]; selReaction=""; selAction=""; selConcerns=[];
-  document.getElementById("client-chips").querySelectorAll(".chip").forEach(x=>x.className="chip");
-  document.getElementById("task-chips").querySelectorAll(".chip").forEach(x=>x.className="chip");
-  document.getElementById("reaction-chips").querySelectorAll(".chip").forEach(x=>x.className="chip");
-  document.getElementById("action-chips").querySelectorAll(".chip").forEach(x=>x.className="chip");
-  document.getElementById("concern-chips").querySelectorAll(".chip").forEach(x=>x.className="chip");
   document.getElementById("memo-input").value="";
   document.getElementById("add-btn").disabled=true;
+  buildChips();
   updateEntryCount();
 }
 
 function goFinish(){
   const dateStr = d.toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"});
-  let text = `【営業日報】\n氏名：${currentUser.name}\n日付：${dateStr}\n\n`;
-  text += `■ 本日の活動記録\n`;
+  let text = `【営業日報】\n氏名：${currentUser.name}\n日付：${dateStr}\n\n■ 本日の活動記録\n`;
   entries.forEach((e,i)=>{
     text += `\n${i+1}. ${e.client}\n`;
     text += `   作業：${e.tasks.join("、")}\n`;
@@ -314,17 +425,14 @@ function goFinish(){
     if(e.memo)            text += `   備考：${e.memo}\n`;
   });
   text += `\n■ 所感・申し送り\n`;
-
-  // AI用プロンプトを参考表示（将来的にAPI接続予定）
-  const reactions = entries.map(e=>e.reaction).filter(Boolean);
-  const actions   = entries.map(e=>e.action).filter(Boolean);
-  const concerns  = entries.flatMap(e=>e.concerns).filter(Boolean);
-  let aiHint = "（以下を参考に所感を追記してください）\n";
-  if(reactions.length) aiHint += `顧客反応：${[...new Set(reactions)].join("、")}　`;
-  if(actions.length)   aiHint += `次回：${[...new Set(actions)].join("、")}　`;
-  if(concerns.length)  aiHint += `懸念：${[...new Set(concerns)].join("、")}`;
-  text += aiHint;
-
+  const reactions = [...new Set(entries.map(e=>e.reaction).filter(Boolean))];
+  const actions   = [...new Set(entries.map(e=>e.action).filter(Boolean))];
+  const concerns  = [...new Set(entries.flatMap(e=>e.concerns).filter(Boolean))];
+  let hint = "（以下を参考に追記してください）\n";
+  if(reactions.length) hint += `顧客反応：${reactions.join("、")}　`;
+  if(actions.length)   hint += `次回：${actions.join("、")}　`;
+  if(concerns.length)  hint += `懸念：${concerns.join("、")}`;
+  text += hint;
   document.getElementById("report-text").value = text;
   show("report");
 }
@@ -338,11 +446,13 @@ function showDone(){
 
 function reset(){
   currentUser=null; entries=[]; selClient=""; selTasks=[]; selReaction=""; selAction=""; selConcerns=[];
-  document.getElementById("pin-input").value="";
+  document.getElementById("pin-input-field").value="";
   show("pin");
 }
 
 function show(s){
-  ["pin","add","report","done"].forEach(x=>document.getElementById("screen-"+x).style.display=x===s?"block":"none");
+  ["pin","add","report","done"].forEach(x=>{
+    document.getElementById("screen-"+x).style.display = x===s ? "block" : "none";
+  });
 }
 </script>
