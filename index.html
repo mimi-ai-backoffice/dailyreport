@@ -159,32 +159,22 @@ textarea {
 <!-- 設定パネル -->
 <div id="panel-settings" style="display:none;">
   <div class="card" style="border-color:var(--color-border-info);">
-    <div style="font-size:13px; font-weight:500; color:var(--color-text-primary); margin-bottom:16px;">⚙ 接続設定</div>
+    <div style="font-size:13px; font-weight:500; color:var(--color-text-primary); margin-bottom:16px;">⚙ 接続設定メモ</div>
 
-    <!-- GAS URL -->
-    <div class="label">① GAS URL <span class="req">*</span></div>
-    <input type="url" id="setting-gas-url" placeholder="https://script.google.com/macros/s/..."
-      style="width:100%; padding:10px; border-radius:var(--border-radius-md);
-             border:0.5px solid var(--color-border-secondary);
-             background:var(--color-background-secondary);
-             color:var(--color-text-primary); font-size:12px; margin-bottom:4px;" />
-    <div style="font-size:11px; color:var(--color-text-tertiary); margin-bottom:16px;">
-      GASを「ウェブアプリとして導入」したときに発行されるURLを貼る
-    </div>
-
-    <!-- SHEET_ID の案内（入力はGAS側で行う） -->
-    <div class="label">② SHEET_ID（GAS側で設定）</div>
-    <div style="font-size:11px; color:var(--color-text-tertiary); line-height:1.8; margin-bottom:8px;
+    <div style="font-size:11px; color:var(--color-text-tertiary); line-height:2; margin-bottom:4px;
                 background:var(--color-background-secondary); padding:10px;
                 border-radius:var(--border-radius-md);">
-      GASエディタ → 左メニュー「プロジェクトの設定」<br>
+      <strong style="color:var(--color-text-primary);">① GAS URL</strong><br>
+      このHTMLファイルの先頭にある<br>
+      <code style="color:var(--color-text-info);">const GAS_URL = "..."</code><br>
+      に直接貼ってから配布する<br><br>
+      <strong style="color:var(--color-text-primary);">② SHEET_ID</strong><br>
+      GASエディタ → プロジェクトの設定<br>
       → スクリプトプロパティ → プロパティを追加<br>
-      <span style="color:var(--color-text-primary);">キー：<strong>SHEET_ID</strong>　値：スプレッドシートのID</span>
+      キー：<strong>SHEET_ID</strong>　値：スプレッドシートのID
     </div>
 
-    <div id="settings-status" style="font-size:12px; min-height:16px; margin-bottom:8px;"></div>
-    <button onclick="saveSettings()" class="btn-success" style="margin-top:0;">保存する</button>
-    <button onclick="toggleSettings()" class="btn-sub">閉じる</button>
+    <button onclick="toggleSettings()" class="btn-sub" style="margin-top:8px;">閉じる</button>
   </div>
 </div>
 
@@ -294,25 +284,12 @@ textarea {
 </div><!-- /wrapper -->
 
 <script>
-// GAS URLは設定画面から入力・localStorageに保存
-function getGasUrl() {
-  return localStorage.getItem("nippo_gas_url") || "";
-}
+// ▼ GASのURLをここに貼る（配布前に1回だけ設定）
+const GAS_https://script.google.com/macros/s/AKfycbyUKj3-HHidsJkjE16J-4YjSYjumZQ74uMc3hqGYYBNOs4-bG6IESc-a6Zz41Oarata_w/exec = "ここにGASのURLを貼る";
+
 function toggleSettings() {
   const panel = document.getElementById("panel-settings");
-  const isOpen = panel.style.display !== "none";
-  panel.style.display = isOpen ? "none" : "block";
-  if (!isOpen) {
-    document.getElementById("setting-gas-url").value = getGasUrl();
-    document.getElementById("settings-status").textContent = "";
-  }
-}
-function saveSettings() {
-  const url = document.getElementById("setting-gas-url").value.trim();
-  localStorage.setItem("nippo_gas_url", url);
-  const st = document.getElementById("settings-status");
-  st.style.color = "var(--color-text-success)";
-  st.textContent = "✅ 保存しました";
+  panel.style.display = panel.style.display === "none" ? "block" : "none";
 }
 
 const USERS = {
@@ -502,8 +479,8 @@ function showDone(){
     reportText: report
   };
 
-  const gasUrl = getGasUrl();
-  if (!gasUrl) {
+  const gasUrl = GAS_URL;
+  if (!gasUrl || gasUrl === "ここにGASのURLを貼る") {
     // URL未設定の場合はそのまま完了画面へ
     document.getElementById("done-name").textContent = "お疲れ様でした、"+currentUser.name+"さん";
     document.getElementById("done-report").textContent = report;
