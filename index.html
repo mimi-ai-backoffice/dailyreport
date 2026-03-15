@@ -1,4 +1,5 @@
 
+// v1.3 (2026-03-15) 所感欄に取引先ごとの記入行＋その他欄を追加
 // v1.2 (2026-03-15) PC・スマホ両対応のレスポンシブデザインに調整
 // v1.1 (2026-03-15) 顧客の反応・次回アクション・懸念課題のチップを追加
 // v1.0 (2026-03-15) 初版
@@ -424,15 +425,15 @@ function goFinish(){
     if(e.concerns.length) text += `   懸念・課題：${e.concerns.join("、")}\n`;
     if(e.memo)            text += `   備考：${e.memo}\n`;
   });
+
+  // 所感欄：訪問した取引先ごとに記入行を用意 + その他欄
   text += `\n■ 所感・申し送り\n`;
-  const reactions = [...new Set(entries.map(e=>e.reaction).filter(Boolean))];
-  const actions   = [...new Set(entries.map(e=>e.action).filter(Boolean))];
-  const concerns  = [...new Set(entries.flatMap(e=>e.concerns).filter(Boolean))];
-  let hint = "（以下を参考に追記してください）\n";
-  if(reactions.length) hint += `顧客反応：${reactions.join("、")}　`;
-  if(actions.length)   hint += `次回：${actions.join("、")}　`;
-  if(concerns.length)  hint += `懸念：${concerns.join("、")}`;
-  text += hint;
+  const visitedClients = [...new Set(entries.map(e=>e.client))];
+  visitedClients.forEach(client => {
+    text += `\n${client}：`;
+  });
+  text += `\n\nその他：`;
+
   document.getElementById("report-text").value = text;
   show("report");
 }
